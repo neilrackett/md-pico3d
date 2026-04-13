@@ -11,6 +11,7 @@ git submodule update --init --recursive
 echo "Pinning the SDK versions..."
 cd pico-sdk
 git checkout tags/2.1.1
+git submodule update --init
 cd ..
 
 echo "Pinning the Extras SDK versions..."
