@@ -1,7 +1,7 @@
 {
   "uuid": "<APP_UUID>",
   "name": "Pico3D",
-  "description": "Pico3D Open World 3D Game Engine for Atari ST with SidecarTridge Multi-device",
+  "description": "Pico3D open world 3D game demo for Atari ST with SidecarTridge Multi-device",
   "image": "https://placehold.co/256x256/png",
   "tags": [
     "Pico3D",
