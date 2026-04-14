@@ -14,7 +14,7 @@ COPYCODE_A_SRCADDR  equ (ROM4_ADDR + $600)
 COPYCODE_B_SRCADDR  equ (ROM4_ADDR + $2600)
 COPYCODE_A_ADDR     equ (SCREEN_A_BASE_ADDR - COPIED_CODE_OFFSET + $600)
 COPYCODE_B_ADDR     equ (SCREEN_A_BASE_ADDR - COPIED_CODE_OFFSET + $2600)
-COPYCODE_SIZE       equ $1F48
+COPYCODE_SIZE       equ $1F46  ; 500 × 16-byte MOVEM pairs + 4 preamble + 4 postamble + 2 RTS
 
 ; Shared memory layout in ROM4 space
 KEY_BITMAP_ADDR     equ (ROM4_ADDR + $500)  ; 16-byte IKBD scancode bitmap
