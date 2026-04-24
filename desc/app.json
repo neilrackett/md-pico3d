@@ -1,8 +1,8 @@
 {
   "uuid": "<APP_UUID>",
-  "name": "Pico3D Open World 3D Game",
+  "name": "Pico3D: Open World 3D Game",
   "description": "Pico3D is an open world 3D game demo for Atari ST with SidecarTridge Multi-device",
-  "image": "https://placehold.co/256x256/png",
+  "image": "https://atarist.neilrackett.com/<APP_UUID>.png",
   "tags": [
     "Demo",
     "GPU",
@@ -15,7 +15,7 @@
     "Atari MegaST",
     "Atari MegaSTE"
   ],
-  "binary": "https://atarist.sidecartridge.com/<APP_UUID>-<APP_VERSION>.uf2",
+  "binary": "https://atarist.neilrackett.com/<APP_UUID>-<APP_VERSION>.uf2",
   "md5": "<BINARY_MD5_HASH>",
   "version": "<APP_VERSION>"
 }
