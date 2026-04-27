@@ -21,6 +21,8 @@
   "cmake.sourceDirectory": "${workspaceFolder}/rp/src",
   "cmake.buildDirectory": "${workspaceFolder}/rp/build",
   "cmake.configureSettings": {
+    "PICO_SDK_PATH": "${workspaceFolder}/pico-sdk",
+    "PICO_EXTRAS_PATH": "${workspaceFolder}/pico-extras",
     "TEST_IMAGE_MODE": "1"
   },
 
