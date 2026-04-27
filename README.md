@@ -48,6 +48,38 @@ This will:
 
 The pico-sdk and pico-extras submodules are checked out automatically by the build script.
 
+### Test Image Mode
+
+`TEST_IMAGE_MODE` is a compile-time mode that skips gameplay and displays one static test image through the same ST output path (chunky RGB4444 → Bayer-dithered C2P → 320×200 planar + palette upload).
+
+Normal builds remain unchanged by default.
+
+Enable test mode from CLI:
+
+```sh
+TEST_IMAGE_MODE=1 ./build.sh pico debug <uuid>
+```
+
+Enable test mode in VS Code CMake Tools:
+
+```json
+"cmake.configureSettings": {
+  "TEST_IMAGE_MODE": "1"
+}
+```
+
+If you toggle this value, run a CMake reconfigure (or clear cache + reconfigure) before rebuilding.
+
+Test image input requirements:
+
+- Path: `assets/test_mode.png`
+- Size: `160x100` exactly
+- PNG types accepted: RGB, RGBA, or palettized (converted internally to RGB)
+
+The converter generates a build-time header (`generated/test_mode_image.h`) and fails with a clear error if the image is missing, has the wrong size, or Pillow is not installed.
+
+In test mode the firmware uses a fixed 16-colour EGA palette and keeps the normal ST handshake / framebuffer / palette pipeline active.
+
 ### Palette data
 
 The 4 day/night colour palettes and RGB4444→index LUTs are pre-generated from the world geometry. To regenerate after modifying `chunk_data.c`:

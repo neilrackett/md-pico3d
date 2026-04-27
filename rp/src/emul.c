@@ -26,6 +26,13 @@
 #include "game/logic_globals.h"
 #include "palette_data.h"
 
+#if defined(TEST_IMAGE_MODE) && (TEST_IMAGE_MODE != 0)
+#define TEST_IMAGE_MODE_ACTIVE 1
+#include "test_mode_image.h"
+#else
+#define TEST_IMAGE_MODE_ACTIVE 0
+#endif
+
 /* ──────────────────────────────────────────────────────────────────────────
  * Shared-memory layout in ROM_IN_RAM (relative to __rom_in_ram_start__)
  * 0x000–0x4FF : MOVEM.L copy-code block
@@ -45,8 +52,10 @@ static volatile bool startBooster = false;
 static uint32_t memorySharedAddress     = 0;
 static uint32_t displayCommandAddress   = 0;
 
+#if !TEST_IMAGE_MODE_ACTIVE
 /* RGB4444 chunky framebuffer (160×100) — filled by Core 1 rasterizer */
 static uint16_t chunky_fb[SCREEN_WIDTH * SCREEN_HEIGHT];
+#endif
 
 /* Defined here; render_globals.h declares it extern */
 uint8_t skip_frame = 0;
@@ -57,6 +66,69 @@ static struct VGA_FONT font6x8_ram;
 
 /* Track last daylight phase to detect transitions */
 static int8_t last_daylight = -1;
+
+#if TEST_IMAGE_MODE_ACTIVE
+/* Fixed EGA 16-color palette in Pico3D RGB4444 GBAR layout (g<<12|b<<8|r). */
+static const uint16_t test_mode_ega_gbar[16] = {
+    0x0000, 0x0A00, 0xA000, 0xAA00,
+    0x000A, 0x0A0A, 0x500A, 0xAA0A,
+    0x5505, 0x5F05, 0xF505, 0xFF05,
+    0x550F, 0x5F0F, 0xF50F, 0xFF0F
+};
+
+static uint8_t test_mode_lut[4096];
+static uint16_t test_mode_palette_st[16];
+
+_Static_assert(TEST_MODE_IMAGE_WIDTH == SCREEN_WIDTH,
+               "TEST_IMAGE_MODE image width must match SCREEN_WIDTH");
+_Static_assert(TEST_MODE_IMAGE_HEIGHT == SCREEN_HEIGHT,
+               "TEST_IMAGE_MODE image height must match SCREEN_HEIGHT");
+
+static uint16_t rgb4444_gbar_to_st_word(uint16_t gbar) {
+    uint16_t r =  gbar        & 0x0F;
+    uint16_t b = (gbar >> 8)  & 0x0F;
+    uint16_t g = (gbar >> 12) & 0x0F;
+    return (uint16_t)(((r >> 1) << 8) | ((g >> 1) << 4) | (b >> 1));
+}
+
+/* Build fixed ST palette words and RGB4444->index LUT for test mode. */
+static void build_test_mode_palette_and_lut(void) {
+    uint8_t pal_r[16];
+    uint8_t pal_g[16];
+    uint8_t pal_b[16];
+
+    for (int i = 0; i < 16; i++) {
+        uint16_t gbar = test_mode_ega_gbar[i];
+        pal_r[i] = (uint8_t)( gbar        & 0x0F);
+        pal_b[i] = (uint8_t)((gbar >> 8)  & 0x0F);
+        pal_g[i] = (uint8_t)((gbar >> 12) & 0x0F);
+        test_mode_palette_st[i] = rgb4444_gbar_to_st_word(gbar);
+    }
+
+    for (int key = 0; key < 4096; key++) {
+        int r =  key        & 0x0F;
+        int b = (key >> 8)  & 0x0F;
+        int g = (key >> 12) & 0x0F;
+
+        int best_index = 0;
+        int best_dist = 1 << 30;
+
+        for (int i = 0; i < 16; i++) {
+            int dr = r - pal_r[i];
+            int dg = g - pal_g[i];
+            int db = b - pal_b[i];
+            int dist = (dr * dr) + (dg * dg) + (db * db);
+
+            if (dist < best_dist) {
+                best_dist = dist;
+                best_index = i;
+            }
+        }
+
+        test_mode_lut[key] = (uint8_t)best_index;
+    }
+}
+#endif
 
 /* ──────────────────────────────────────────────────────────────────────────
  * DMA IRQ handler — same structure as sprites demo
@@ -95,6 +167,7 @@ void __not_in_flash_func(emul_dma_irq_handler_lookup)(void) {
 static semaphore_t raster_done_sem;
 static semaphore_t raster_go_sem;
 
+#if !TEST_IMAGE_MODE_ACTIVE
 static void __not_in_flash_func(core1_entry)(void) {
     while (1) {
         /* Wait for Core 0 to hand off the triangle list */
@@ -110,6 +183,7 @@ static void __not_in_flash_func(core1_entry)(void) {
         sem_release(&raster_done_sem);
     }
 }
+#endif
 
 /* ──────────────────────────────────────────────────────────────────────────
  * Helpers
@@ -195,9 +269,14 @@ void __not_in_flash_func(emul_start)(void) {
     font_set_font(&font6x8_ram);
     font_set_color(15);
 
-    /* Set initial palette (day phase) from pre-generated palette data */
+    /* Set initial palette */
+#if TEST_IMAGE_MODE_ACTIVE
+    build_test_mode_palette_and_lut();
+    c2p_set_lut(test_mode_lut, test_mode_palette_st);
+#else
     c2p_set_lut(luts[0], palettes[0]);
     last_daylight = 0;
+#endif
 
     /* Set key bitmap address for input system */
     input_set_key_bitmap_address(
@@ -216,6 +295,29 @@ void __not_in_flash_func(emul_start)(void) {
     sem_acquire_blocking(&start_demo_sem);
     DPRINTF("ST ready\n");
 
+#if TEST_IMAGE_MODE_ACTIVE
+    DPRINTF("TEST_IMAGE_MODE enabled: rendering static test image\n");
+
+    /* Fill both framebuffers with the same static image using existing C2P path. */
+    c2p_convert_and_double(test_mode_image_rgb4444,
+                           (unsigned int *)vga_screen.hidden_framebuffer);
+    vga_swap_framebuffers();
+    c2p_convert_and_double(test_mode_image_rgb4444,
+                           (unsigned int *)vga_screen.hidden_framebuffer);
+    vga_swap_framebuffers();
+
+    write_palette_to_shared();
+    WRITE_AND_SWAP_LONGWORD((uint32_t)&__rom_in_ram_start__,
+                            CUSTOM_FRAMEBUFFER_INDEX,
+                            vga_screen.current_framebuffer_id);
+
+    DPRINTF("Entering TEST_IMAGE_MODE loop\n");
+    while (1) {
+        sem_acquire_blocking(&draw_sem);
+        if (startBooster) break;
+        write_palette_to_shared();
+    }
+#else
     /* ────────────────────────────────────────────────────────────────────
      * Start Core 1 rasterizer
      * ──────────────────────────────────────────────────────────────────── */
@@ -291,6 +393,7 @@ void __not_in_flash_func(emul_start)(void) {
                                 CUSTOM_FRAMEBUFFER_INDEX,
                                 vga_screen.current_framebuffer_id);
     }
+#endif
 
     /* ────────────────────────────────────────────────────────────────────
      * Exit to Booster

@@ -32,6 +32,27 @@ pico_sdk_init()
 
 add_subdirectory(settings)
 
+# Test image mode (default off).
+# If not set in cache, fall back to TEST_IMAGE_MODE environment variable.
+set(_TEST_IMAGE_MODE_DEFAULT "0")
+if(DEFINED ENV{TEST_IMAGE_MODE} AND NOT "$ENV{TEST_IMAGE_MODE}" STREQUAL "")
+    set(_TEST_IMAGE_MODE_DEFAULT "$ENV{TEST_IMAGE_MODE}")
+endif()
+
+if(NOT DEFINED TEST_IMAGE_MODE)
+    set(TEST_IMAGE_MODE "${_TEST_IMAGE_MODE_DEFAULT}" CACHE STRING "Enable static test image mode (0 or 1)")
+endif()
+
+if(TEST_IMAGE_MODE STREQUAL "1" OR TEST_IMAGE_MODE STREQUAL "ON" OR TEST_IMAGE_MODE STREQUAL "TRUE")
+    set(TEST_IMAGE_MODE_ENABLED 1)
+elseif(TEST_IMAGE_MODE STREQUAL "0" OR TEST_IMAGE_MODE STREQUAL "OFF" OR TEST_IMAGE_MODE STREQUAL "FALSE" OR TEST_IMAGE_MODE STREQUAL "")
+    set(TEST_IMAGE_MODE_ENABLED 0)
+else()
+    message(FATAL_ERROR "Invalid TEST_IMAGE_MODE='${TEST_IMAGE_MODE}'. Use 0 or 1.")
+endif()
+
+message(STATUS "TEST_IMAGE_MODE: ${TEST_IMAGE_MODE_ENABLED}")
+
 add_executable(${PROJECT_NAME}
     main.c
 )
@@ -94,6 +115,37 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_LIST_DIR}/..
 )
+
+if(TEST_IMAGE_MODE_ENABLED)
+    find_program(TEST_IMAGE_MODE_PYTHON_EXECUTABLE NAMES python3 REQUIRED)
+    message(STATUS "TEST_IMAGE_MODE Python: ${TEST_IMAGE_MODE_PYTHON_EXECUTABLE}")
+
+    set(TEST_MODE_IMAGE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../assets/test_mode.png")
+    set(TEST_MODE_IMAGE_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../tools/gen_test_mode_image.py")
+    set(TEST_MODE_IMAGE_GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
+    set(TEST_MODE_IMAGE_HEADER "${TEST_MODE_IMAGE_GENERATED_DIR}/test_mode_image.h")
+
+    add_custom_command(
+        OUTPUT "${TEST_MODE_IMAGE_HEADER}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${TEST_MODE_IMAGE_GENERATED_DIR}"
+        COMMAND ${TEST_IMAGE_MODE_PYTHON_EXECUTABLE}
+                "${TEST_MODE_IMAGE_SCRIPT}"
+                --input "${TEST_MODE_IMAGE_SOURCE}"
+                --output "${TEST_MODE_IMAGE_HEADER}"
+        DEPENDS
+            "${TEST_MODE_IMAGE_SCRIPT}"
+            "${TEST_MODE_IMAGE_SOURCE}"
+        COMMENT "Generating test mode image header from assets/test_mode.png"
+        VERBATIM
+    )
+
+    add_custom_target(generate_test_mode_image_header DEPENDS "${TEST_MODE_IMAGE_HEADER}")
+    add_dependencies(${PROJECT_NAME} generate_test_mode_image_header)
+    target_sources(${PROJECT_NAME} PRIVATE "${TEST_MODE_IMAGE_HEADER}")
+    target_include_directories(${PROJECT_NAME} PRIVATE "${TEST_MODE_IMAGE_GENERATED_DIR}")
+    set_source_files_properties(emul.c PROPERTIES OBJECT_DEPENDS "${TEST_MODE_IMAGE_HEADER}")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TEST_IMAGE_MODE=1)
+endif()
 
 # Release metadata
 set(RELEASE_TYPE $ENV{RELEASE_TYPE})
