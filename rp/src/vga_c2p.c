@@ -48,8 +48,8 @@ static const int8_t bayer4x4[4][4] = {
     { 15,  7, 13,  5 },
 };
 
-/* Active palette LUT: maps RGB4444 value (0..4095) to 4-bit palette index.
- * Points into flash — swapped when daylight phase changes. */
+/* Active palette LUT: maps packed RGB444 key (g<<8 | b<<4 | r, 0..4095)
+ * to 4-bit palette index. Points into flash — swapped when phase changes. */
 static const uint8_t *active_lut = NULL;
 
 /* Active 16-color ST palette: 16 uint16_t words in ST format.
@@ -116,8 +116,8 @@ void __not_in_flash_func(c2p_convert_and_double)(
             g = g + ((dither - 8) >> 2); if (g < 0) g = 0; if (g > 15) g = 15;
             b = b + ((dither - 8) >> 2); if (b < 0) b = 0; if (b > 15) b = 15;
 
-            /* Reconstruct dithered RGB4444 key and look up palette index */
-            uint16_t key = ((uint16_t)g << 12) | ((uint16_t)b << 8) | (uint16_t)r;
+            /* Pack channels to a dense 12-bit LUT key (g<<8 | b<<4 | r). */
+            uint16_t key = ((uint16_t)g << 8) | ((uint16_t)b << 4) | (uint16_t)r;
             uint8_t idx  = active_lut[key];
 
             /* Destination x = sx*2, pixel position within 16-pixel group */

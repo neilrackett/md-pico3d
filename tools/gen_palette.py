@@ -21,22 +21,26 @@ import os
 from pathlib import Path
 
 # ── Color format ─────────────────────────────────────────────────────────────
-# Pico3D RGB4444 word layout: bits [15:12]=G, [11:8]=B, [7:4]=unused, [3:0]=R
-# (GBAR = g<<12 | b<<8 | 0<<4 | r)
+# Pico3D RGB4444 word layout in game data: bits [15:12]=G, [11:8]=B,
+# [7:4]=unused, [3:0]=R (GBAR = g<<12 | b<<8 | 0<<4 | r).
+# LUT indexing uses dense packed RGB444 keys: (g<<8 | b<<4 | r), 0..4095.
 # ST palette format: 0x0RGB (3 bits per channel: bits [8:6]=R, [5:3]=G, [2:0]=B)
 # but stored as uint16_t words for direct write to $FFFF8240.
 # Since our C2P uses 4-bit-per-channel, we map to ST's 3-bit range (0..7).
 
-def gbar_to_rgb(v):
-    """Unpack Pico3D GBAR RGB4444 word to (r,g,b) each 0-15."""
+def gbar_word_to_rgb(v):
+    """Unpack Pico3D GBAR RGB4444 word to (r,g,b), each channel 0-15."""
     r = v & 0x0F
     b = (v >> 8) & 0x0F
     g = (v >> 12) & 0x0F
     return (r, g, b)
 
-def rgb_to_gbar(r, g, b):
-    """Pack (r,g,b) 0-15 to Pico3D GBAR RGB4444 word."""
-    return (g << 12) | (b << 8) | r
+def packed_rgb444_key_to_rgb(key):
+    """Unpack LUT key (g<<8 | b<<4 | r) to (r,g,b), each channel 0-15."""
+    r = key & 0x0F
+    b = (key >> 4) & 0x0F
+    g = (key >> 8) & 0x0F
+    return (r, g, b)
 
 def rgb4444_to_st_palette_word(r, g, b):
     """Convert (r,g,b) 0-15 to Atari ST hardware palette word (0x0RGB, 3 bits/ch)."""
@@ -143,12 +147,12 @@ def median_cut(colors_rgb, n_colors):
 
 def build_lut(palette):
     """
-    Build a 4096-entry LUT: lut[gbar_key] = nearest palette index (0-15).
+    Build a 4096-entry LUT: lut[packed_rgb444_key] = nearest palette index.
     Uses squared Euclidean distance in RGB space.
     """
     lut = bytearray(4096)
     for key in range(4096):
-        r, g, b = gbar_to_rgb(key)
+        r, g, b = packed_rgb444_key_to_rgb(key)
         best_idx = 0
         best_dist = 10**9
         for i, (pr, pg, pb) in enumerate(palette):
@@ -180,7 +184,7 @@ def main():
     # uses values like 0x3303 (g=3, b=3, r=3) which are low-intensity
     base_colors_rgb = []
     for v in raw_colors:
-        r, g, b = gbar_to_rgb(v)
+        r, g, b = gbar_word_to_rgb(v)
         base_colors_rgb.append((r, g, b))
 
     print(f"  {len(base_colors_rgb)} base colors extracted")

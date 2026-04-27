@@ -76,6 +76,7 @@ static const uint16_t test_mode_ega_gbar[16] = {
     0x550F, 0x5F0F, 0xF50F, 0xFF0F
 };
 
+/* LUT key is packed RGB444: (g<<8 | b<<4 | r), range 0..4095. */
 static uint8_t test_mode_lut[4096];
 static uint16_t test_mode_palette_st[16];
 
@@ -107,8 +108,8 @@ static void build_test_mode_palette_and_lut(void) {
 
     for (int key = 0; key < 4096; key++) {
         int r =  key        & 0x0F;
-        int b = (key >> 8)  & 0x0F;
-        int g = (key >> 12) & 0x0F;
+        int b = (key >> 4)  & 0x0F;
+        int g = (key >> 8)  & 0x0F;
 
         int best_index = 0;
         int best_dist = 1 << 30;
