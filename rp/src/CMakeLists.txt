@@ -117,33 +117,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 if(TEST_IMAGE_MODE_ENABLED)
-    find_program(TEST_IMAGE_MODE_PYTHON_EXECUTABLE NAMES python3 REQUIRED)
-    message(STATUS "TEST_IMAGE_MODE Python: ${TEST_IMAGE_MODE_PYTHON_EXECUTABLE}")
-
-    set(TEST_MODE_IMAGE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../assets/test_mode.png")
-    set(TEST_MODE_IMAGE_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../../tools/gen_test_mode_image.py")
-    set(TEST_MODE_IMAGE_GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
-    set(TEST_MODE_IMAGE_HEADER "${TEST_MODE_IMAGE_GENERATED_DIR}/test_mode_image.h")
-
-    add_custom_command(
-        OUTPUT "${TEST_MODE_IMAGE_HEADER}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${TEST_MODE_IMAGE_GENERATED_DIR}"
-        COMMAND ${TEST_IMAGE_MODE_PYTHON_EXECUTABLE}
-                "${TEST_MODE_IMAGE_SCRIPT}"
-                --input "${TEST_MODE_IMAGE_SOURCE}"
-                --output "${TEST_MODE_IMAGE_HEADER}"
-        DEPENDS
-            "${TEST_MODE_IMAGE_SCRIPT}"
-            "${TEST_MODE_IMAGE_SOURCE}"
-        COMMENT "Generating test mode image header from assets/test_mode.png"
-        VERBATIM
-    )
-
-    add_custom_target(generate_test_mode_image_header DEPENDS "${TEST_MODE_IMAGE_HEADER}")
-    add_dependencies(${PROJECT_NAME} generate_test_mode_image_header)
-    target_sources(${PROJECT_NAME} PRIVATE "${TEST_MODE_IMAGE_HEADER}")
-    target_include_directories(${PROJECT_NAME} PRIVATE "${TEST_MODE_IMAGE_GENERATED_DIR}")
-    set_source_files_properties(emul.c PROPERTIES OBJECT_DEPENDS "${TEST_MODE_IMAGE_HEADER}")
+    set(TEST_MODE_IMAGE_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/test_mode_image.h")
+    if(NOT EXISTS "${TEST_MODE_IMAGE_HEADER}")
+        message(FATAL_ERROR
+            "TEST_IMAGE_MODE=1 requires ${TEST_MODE_IMAGE_HEADER}. "
+            "Generate it with: python3 tools/gen_test_mode_image.py "
+            "--input assets/test_mode.png --output rp/src/include/test_mode_image.h")
+    endif()
     target_compile_definitions(${PROJECT_NAME} PRIVATE TEST_IMAGE_MODE=1)
 endif()
 

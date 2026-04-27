@@ -3,4 +3,5 @@
 ./uuid.txt
 test_models/
 build/
+build-*/
 dist/

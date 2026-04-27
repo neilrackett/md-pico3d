@@ -76,7 +76,15 @@ Test image input requirements:
 - Size: `160x100` exactly
 - PNG types accepted: RGB, RGBA, or palettized (converted internally to RGB)
 
-The converter generates a build-time header (`generated/test_mode_image.h`) and fails with a clear error if the image is missing, has the wrong size, or Pillow is not installed.
+Regenerate the image header after changing `assets/test_mode.png`:
+
+```sh
+python3 tools/gen_test_mode_image.py \
+  --input assets/test_mode.png \
+  --output rp/src/include/test_mode_image.h
+```
+
+The converter fails with a clear error if the image is missing, has the wrong size, or Pillow is not installed.
 
 In test mode the firmware uses a fixed 16-colour EGA palette and keeps the normal ST handshake / framebuffer / palette pipeline active.
 
