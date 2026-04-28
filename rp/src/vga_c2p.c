@@ -72,7 +72,8 @@ const uint16_t *c2p_get_palette(void) {
  * @dst  : ST planar framebuffer (hidden), must be 320*200/2 bytes = 32000 bytes
  *
  * The output framebuffer is cleared before conversion, then each source pixel
- * is dithered, looked up via active_lut, and written as a 2x2 pixel block.
+ * is expanded to a 2x2 block where each destination pixel gets its own Bayer
+ * sample (post-doubling dithering), then looked up via active_lut.
  *
  * Pixels within each 16-pixel word group are written using pixel_masks_flat
  * (same mechanism as the sprites demo's tile renderer).
@@ -92,56 +93,46 @@ void __not_in_flash_func(c2p_convert_and_double)(
     const int BYTES_PER_ROW  = GROUPS_PER_ROW * 8;  /* 160 */
 
     for (int sy = 0; sy < SCREEN_HEIGHT; sy++) {
-        /* Two destination rows for each source row */
-        uint8_t *dst_row0 = (uint8_t *)dst + (sy * 2    ) * BYTES_PER_ROW;
-        uint8_t *dst_row1 = (uint8_t *)dst + (sy * 2 + 1) * BYTES_PER_ROW;
-
-        /* Dither row index */
-        int by = sy & 3;
-
         for (int sx = 0; sx < SCREEN_WIDTH; sx++) {
             uint16_t rgb = src[sy * SCREEN_WIDTH + sx];
 
             /* Extract RGB4444 channels (Pico3D format: GBAR = g<<12|b<<8|r) */
-            int r = (int)( rgb        & 0x000F);
-            int b = (int)((rgb >> 8 ) & 0x000F);
-            int g = (int)((rgb >> 12) & 0x000F);
+            int r0 = (int)( rgb        & 0x000F);
+            int b0 = (int)((rgb >> 8 ) & 0x000F);
+            int g0 = (int)((rgb >> 12) & 0x000F);
 
-            /* Apply Bayer dither: adds ordered offset to reduce quantisation */
-            int bx = sx & 3;
-            int dither = bayer4x4[by][bx];
+            /* Expand one source pixel into 2x2 destination pixels.
+             * Dither is sampled in destination space (dx, dy). */
+            int dy_base = sy << 1;
+            int dx_base = sx << 1;
 
-            /* Dither with clamping (channels are 0..15, dither 0..15) */
-            r = r + ((dither - 8) >> 2); if (r < 0) r = 0; if (r > 15) r = 15;
-            g = g + ((dither - 8) >> 2); if (g < 0) g = 0; if (g > 15) g = 15;
-            b = b + ((dither - 8) >> 2); if (b < 0) b = 0; if (b > 15) b = 15;
+            for (int oy = 0; oy < 2; oy++) {
+                int dy = dy_base + oy;
+                int by = dy & 3;
+                uint8_t *dst_row = (uint8_t *)dst + dy * BYTES_PER_ROW;
 
-            /* Pack channels to a dense 12-bit LUT key (g<<8 | b<<4 | r). */
-            uint16_t key = ((uint16_t)g << 8) | ((uint16_t)b << 4) | (uint16_t)r;
-            uint8_t idx  = active_lut[key];
+                for (int ox = 0; ox < 2; ox++) {
+                    int dx = dx_base + ox;
+                    int bx = dx & 3;
+                    int dither = bayer4x4[by][bx];
 
-            /* Destination x = sx*2, pixel position within 16-pixel group */
-            int dx0 = sx * 2;
-            int dx1 = dx0 + 1;
+                    /* Dither with clamping (channels are 0..15, dither 0..15) */
+                    int r = r0 + ((dither - 8) >> 2); if (r < 0) r = 0; if (r > 15) r = 15;
+                    int g = g0 + ((dither - 8) >> 2); if (g < 0) g = 0; if (g > 15) g = 15;
+                    int b = b0 + ((dither - 8) >> 2); if (b < 0) b = 0; if (b > 15) b = 15;
 
-            unsigned group0 = (unsigned)dx0 >> 4;
-            unsigned group1 = (unsigned)dx1 >> 4;
-            unsigned pos0   = (unsigned)dx0 & 0xF;
-            unsigned pos1   = (unsigned)dx1 & 0xF;
+                    /* Pack channels to a dense 12-bit LUT key (g<<8 | b<<4 | r). */
+                    uint16_t key = ((uint16_t)g << 8) | ((uint16_t)b << 4) | (uint16_t)r;
+                    uint8_t idx  = active_lut[key];
 
-            uint64_t mask0 = pixel_masks_flat[(idx << 4) | pos0];
-            uint64_t mask1 = pixel_masks_flat[(idx << 4) | pos1];
+                    unsigned group = (unsigned)dx >> 4;
+                    unsigned pos   = (unsigned)dx & 0xF;
+                    uint64_t mask  = pixel_masks_flat[(idx << 4) | pos];
 
-            /* Write to both destination rows (vertical doubling) */
-            uint64_t *blk0_r0 = (uint64_t *)(dst_row0 + group0 * 8);
-            uint64_t *blk1_r0 = (uint64_t *)(dst_row0 + group1 * 8);
-            uint64_t *blk0_r1 = (uint64_t *)(dst_row1 + group0 * 8);
-            uint64_t *blk1_r1 = (uint64_t *)(dst_row1 + group1 * 8);
-
-            *blk0_r0 |= mask0;
-            *blk1_r0 |= mask1;
-            *blk0_r1 |= mask0;
-            *blk1_r1 |= mask1;
+                    uint64_t *blk = (uint64_t *)(dst_row + group * 8);
+                    *blk |= mask;
+                }
+            }
         }
     }
 }

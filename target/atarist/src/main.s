@@ -83,6 +83,12 @@ get_rez         macro
                 addq.l #2,sp
                 endm
 
+get_screen_base macro
+                move.w #2,-(sp)
+                trap #14
+                addq.l #2,sp
+                endm
+
 ; Load 16 palette words from ROM4 shared memory into ST hardware palette
 ; Trashes: d5, a4
 load_palette    macro
@@ -253,6 +259,11 @@ start_rom_code:
     move.w #CMD_START_DEMO, d7
     tst.b (a0, d7.w)
 
+    ; Save original screen base so boot/reset can restore a sane display state.
+    get_screen_base
+    lea orig_screen_base_local(pc), a1
+    move.l d0, (a1)
+
     ; Detect ST vs STE
     move.l _p_cookies.w, d0
     beq .loop_low_st
@@ -374,6 +385,18 @@ start_rom_code:
 
 ; ─── Reset handler ──────────────────────────────────────────────────────────
 .reset:
+    ; Restore original screen base before reset handoff (high/mid first, low last).
+    lea orig_screen_base_local(pc), a1
+    move.l (a1), d0
+    beq.s .no_screen_restore
+    move.l d0, d5
+    swap d5
+    move.b d5, VIDEO_BASE_ADDR_HIGH.w
+    move.l d0, d5
+    lsr.w #8, d5
+    move.b d5, VIDEO_BASE_ADDR_MID.w
+    move.b d0, VIDEO_BASE_ADDR_LOW.w
+.no_screen_restore:
     move.l #PRE_RESET_WAIT, d6
 .wait_me:
     subq.l #1, d6
@@ -389,7 +412,11 @@ lowres_only:
     print lowres_only_txt
 
 boot_gem:
+    lea orig_screen_base_local(pc), a1
+    move.l (a1), d0
+    bne.s .have_boot_screen
     move.l #SCREEN_B_BASE_ADDR, d0
+.have_boot_screen:
     move.w #-1, -(sp)
     move.l d0, -(sp)
     move.l d0, -(sp)
@@ -401,6 +428,9 @@ boot_gem:
 lowres_only_txt:
     dc.b "Pico3D: low res only",$d,$a,0
     even
+
+orig_screen_base_local:
+    dc.l 0
 
 end_rom_code:
 end_pre_auto:
