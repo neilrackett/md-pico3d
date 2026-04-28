@@ -28,6 +28,20 @@ include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
 project(rp C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 
+get_filename_component(REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+set(BUILD_VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/build_version.h")
+
+if(NOT EXISTS "${BUILD_VERSION_HEADER}")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    file(WRITE "${BUILD_VERSION_HEADER}"
+"/* Auto-generated bootstrap header */
+#ifndef BUILD_VERSION_H
+#define BUILD_VERSION_H
+#define BUILD_RELEASE_VERSION \"v0.0.0\"
+#endif /* BUILD_VERSION_H */
+")
+endif()
+
 pico_sdk_init()
 
 add_subdirectory(settings)
@@ -56,6 +70,16 @@ message(STATUS "TEST_IMAGE_MODE: ${TEST_IMAGE_MODE_ENABLED}")
 add_executable(${PROJECT_NAME}
     main.c
 )
+
+add_custom_target(update_build_version ALL
+    COMMAND "${REPO_ROOT}/tools/bump_version.sh"
+            --repo-root "${REPO_ROOT}"
+            --header "${BUILD_VERSION_HEADER}"
+    BYPRODUCTS "${BUILD_VERSION_HEADER}"
+    COMMENT "Updating build version metadata"
+    VERBATIM
+)
+add_dependencies(${PROJECT_NAME} update_build_version)
 
 pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/romemul.pio)
 
@@ -114,6 +138,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_LIST_DIR}/..
+    ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 
 if(TEST_IMAGE_MODE_ENABLED)
@@ -137,10 +162,7 @@ if(NOT RELEASE_VERSION)
     if(NOT RELEASE_TYPE OR RELEASE_TYPE STREQUAL "")
         set(RELEASE_TYPE "final")
     endif()
-    string(STRIP "${RELEASE_VERSION}" RELEASE_VERSION)
-    if("${RELEASE_VERSION}" STREQUAL "")
-        set(RELEASE_VERSION "v0.0.1dev")
-    endif()
+    set(RELEASE_VERSION "BUILD_RELEASE_VERSION")
 endif()
 
 if(NOT RELEASE_DATE)
@@ -165,7 +187,7 @@ message("RELEASE_DATE: " ${RELEASE_DATE})
 message("DEBUG_MODE: " ${_DEBUG})
 
 add_definitions(-DRELEASE_TYPE="${RELEASE_TYPE}")
-add_definitions(-DRELEASE_VERSION="${RELEASE_VERSION}")
+add_definitions(-DRELEASE_VERSION=BUILD_RELEASE_VERSION)
 add_definitions(-DRELEASE_DATE="${RELEASE_DATE}")
 
 if(DEFINED ENV{APP_UUID_KEY} AND NOT "$ENV{APP_UUID_KEY}" STREQUAL "")

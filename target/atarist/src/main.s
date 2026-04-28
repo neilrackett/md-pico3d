@@ -66,6 +66,7 @@ CMD_START_DEMO      equ ($E1A8)
 
 LISTENER_ADDR       equ (ROM4_ADDR + $5F8)
 REMOTE_RESET        equ $1
+REMOTE_BOOSTER      equ $3
 
     include inc/tos.s
 
@@ -198,6 +199,8 @@ check_keys_booster macro
 check_commands  macro
                 move.l (LISTENER_ADDR), d6
                 cmp.l #REMOTE_RESET, d6
+                beq .reset
+                cmp.l #REMOTE_BOOSTER, d6    ; compatibility with older RP firmware
                 beq .reset
                 endm
 

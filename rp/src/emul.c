@@ -230,6 +230,14 @@ static void set_st_esc_exit_enabled(bool enabled) {
     flag[0] = enabled ? 1u : 0u;
 }
 
+/* Request a clean ST handoff on short SELECT press.
+ * This avoids resetting RP2040 mid-frame while the ST is still displaying
+ * Sidecar framebuffers. */
+static void request_booster_exit(void) {
+    startBooster = true;
+    sem_release(&draw_sem);
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
  * emul_start — main entry point (called from main.c after clock/voltage init)
  * ────────────────────────────────────────────────────────────────────────── */
@@ -249,9 +257,11 @@ void __not_in_flash_func(emul_start)(void) {
     sem_init(&raster_done_sem, 0, 1);
     sem_init(&raster_go_sem,   0, 1);
 
-    /* Configure SELECT button (short = reset, long = erase flash) */
+    /* Configure SELECT button
+     * short press: clean exit path (notify ST, then jump booster)
+     * long press : erase flash + reset */
     select_configure();
-    select_coreWaitPush(reset_device, reset_deviceAndEraseFlash);
+    select_coreWaitPush(request_booster_exit, reset_deviceAndEraseFlash);
 
     /* ────────────────────────────────────────────────────────────────────
      * VGA init: two 32KB planar framebuffers in ROM_IN_RAM
@@ -425,7 +435,15 @@ void __not_in_flash_func(emul_start)(void) {
      * Exit to Booster
      * ──────────────────────────────────────────────────────────────────── */
     DPRINTF("Exiting to Booster\n");
-    SEND_COMMAND_TO_DISPLAY(DISPLAY_COMMAND_BOOSTER);
-    sleep_ms(500);
-    reset_device();
+    select_setResetCallback(NULL);
+    select_setLongResetCallback(NULL);
+    select_coreWaitPushDisable();
+    set_st_esc_exit_enabled(false);
+
+    /* ST firmware reset handler keys off REMOTE_RESET (command 1). */
+    SEND_COMMAND_TO_DISPLAY(DISPLAY_COMMAND_RESET);
+    sleep_ms(SLEEP_LOOP_MS);
+
+    reset_jump_to_booster();
+    while (1) sleep_ms(SLEEP_LOOP_MS);
 }

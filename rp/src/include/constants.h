@@ -10,6 +10,7 @@
 #define CONSTANTS_H
 
 #include "hardware/vreg.h"
+#include "build_version.h"
 
 // Common macros
 #define HEX_BASE 16

@@ -10,6 +10,9 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     exit 1
 fi
 
+# Increment patch version in root version.txt on every build run and sync sub-project files
+"$SCRIPT_DIR/tools/bump_version.sh" --repo-root "$SCRIPT_DIR"
+
 # Copy the version.txt to each project
 echo "Copy version.txt to each project"
 cp version.txt rp/
@@ -46,7 +49,7 @@ echo "Done building target project"
 # Build the rp project in the RP architecture
 echo "Building rp project"
 cd rp
-./build.sh "$BOARD_TYPE" "$BUILD_TYPE"
+SKIP_VERSION_BUMP=1 ./build.sh "$BOARD_TYPE" "$BUILD_TYPE"
 if [ "$BUILD_TYPE" = "release" ]; then
     cp  ./dist/rp-$BOARD_TYPE.uf2 ../dist/rp.uf2
 else
