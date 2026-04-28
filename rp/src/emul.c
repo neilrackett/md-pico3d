@@ -248,6 +248,8 @@ void __not_in_flash_func(emul_start)(void) {
 
     /* Copy ST firmware to ROM_IN_RAM */
     COPY_FIRMWARE_TO_RAM((uint16_t *)target_firmware, target_firmware_length * 2);
+    memset((void *)(uintptr_t)(memorySharedAddress + ST_KEY_BITMAP_OFFSET), 0, 16);
+    *(volatile uint8_t *)(uintptr_t)(memorySharedAddress + ST_IKBD_SKIP_COUNT_OFFSET) = 0;
 
     /* Set up ROM emulation and DMA IRQ */
     SEND_COMMAND_TO_DISPLAY(DISPLAY_COMMAND_NOP);
@@ -400,7 +402,6 @@ void __not_in_flash_func(emul_start)(void) {
         logic_npc();
         logic_zombies();
         logic_grass();
-        logic_demo();
 
         /* Build triangle list for this frame */
         number_triangles = 0;

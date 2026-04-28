@@ -54,6 +54,16 @@ static int key_pressed(uint8_t scancode) {
     return cur && !prev;
 }
 
+/* Returns non-zero if any key transitioned from up->down this frame. */
+static int any_key_pressed(void) {
+    for (int i = 0; i < 16; i++) {
+        if ((key_state[i] & (uint8_t)~key_state_prev[i]) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void try_move_camera(float move) {
     float old_cam_x = camera_position[0];
     float old_cam_z = camera_position[2];
@@ -149,9 +159,7 @@ void logic_input(void) {
     } else if (menu == MENU_START) {
 
 #ifndef BENCHMARK
-        if (key_pressed(KEY_SPACE) || key_pressed(KEY_UP) || key_pressed(KEY_DOWN) ||
-            key_pressed(KEY_LEFT)  || key_pressed(KEY_RIGHT) || key_pressed(KEY_ESCAPE) ||
-            key_pressed(KEY_LSHIFT) || key_pressed(KEY_LCTRL)) {
+        if (any_key_pressed()) {
             logic_new_game();
             menu = 0;
         }

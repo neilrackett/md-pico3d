@@ -55,8 +55,10 @@ void display_menu(void) {
             font_move(0, 0); font_print("BENCHMARKING");
         }
 #else
-        if (demo_progress < 2500) {
-            font_move(28*2, 20*2); font_print("Pico3D Engine");
+        if (demo_progress < 500) {
+            font_move(28*2, 20*2); font_print("Neil Rackett presents");
+        } else if (demo_progress < 2500) {
+            font_move(28*2, 20*2); font_print("Pico3D for Atari ST");
         }
 
         if ((demo_progress / 32) % 2 == 0) {

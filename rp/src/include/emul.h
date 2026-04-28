@@ -38,6 +38,7 @@
 #define CUSTOM_DISPLAY_COMMAND    0x5F8   /* command channel to ST */
 #define ST_KEY_BITMAP_OFFSET      0x500   /* 16-byte IKBD key state (scancodes 0-127) */
 #define ST_ESC_EXIT_ENABLE_OFFSET 0x510   /* 1 byte: non-zero enables ST ESC->Booster shortcut */
+#define ST_IKBD_SKIP_COUNT_OFFSET 0x511   /* 1 byte: ST-side IKBD parser payload skip counter */
 #define ST_PALETTE_OFFSET         0x520   /* 16 x uint16_t ST palette words (32 bytes) */
 
 /* Sleep loop period */
