@@ -259,10 +259,15 @@ void __not_in_flash_func(emul_start)(void) {
     sem_init(&raster_go_sem,   0, 1);
 
     /* Configure SELECT button
-     * short press: clean exit path (notify ST, then jump booster)
-     * long press : erase flash + reset */
+     * TEST_IMAGE_MODE: use Core 1 wait loop (no rasterizer on Core 1).
+     * Normal mode   : Core 1 is reserved for rasterizer, so poll from Core 0. */
     select_configure();
+#if TEST_IMAGE_MODE_ACTIVE
     select_coreWaitPush(request_booster_exit, reset_deviceAndEraseFlash);
+#else
+    select_setResetCallback(request_booster_exit);
+    select_setLongResetCallback(reset_deviceAndEraseFlash);
+#endif
 
     /* ────────────────────────────────────────────────────────────────────
      * VGA init: two 32KB planar framebuffers in ROM_IN_RAM
@@ -380,6 +385,9 @@ void __not_in_flash_func(emul_start)(void) {
     while (1) {
         /* Block until ST VBLANK signal (sem_release in DMA IRQ) */
         sem_acquire_blocking(&draw_sem);
+
+        /* In normal mode Core 1 is the rasterizer, so SELECT is polled on Core 0. */
+        select_checkPushReset();
 
         if (startBooster) break;
 
