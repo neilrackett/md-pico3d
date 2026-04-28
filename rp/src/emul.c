@@ -37,6 +37,7 @@
  * Shared-memory layout in ROM_IN_RAM (relative to __rom_in_ram_start__)
  * 0x000–0x4FF : MOVEM.L copy-code block
  * 0x500–0x50F : 16-byte IKBD key state bitmap (written by ST assembly)
+ * 0x510       : ESC exit enable flag (RP2040->ST, non-zero enables ESC->Booster)
  * 0x520–0x53F : 16 × uint16_t ST palette words (written by Core 0 each frame)
  * 0x5F8       : display command (RP2040 → ST)
  * 0x5FC       : framebuffer index (0 or 1, RP2040 → ST)
@@ -79,6 +80,9 @@ static const uint16_t test_mode_ega_gbar[16] = {
 /* LUT key is packed RGB444: (g<<8 | b<<4 | r), range 0..4095. */
 static uint8_t test_mode_lut[4096];
 static uint16_t test_mode_palette_st[16];
+
+/* Atari ST IKBD scancode for ESC; bitmap bit = scancode&7 in byte scancode>>3. */
+#define TEST_MODE_ESC_SCANCODE 0x01
 
 _Static_assert(TEST_MODE_IMAGE_WIDTH == SCREEN_WIDTH,
                "TEST_IMAGE_MODE image width must match SCREEN_WIDTH");
@@ -128,6 +132,15 @@ static void build_test_mode_palette_and_lut(void) {
 
         test_mode_lut[key] = (uint8_t)best_index;
     }
+}
+
+/* Fallback ESC detection for test mode:
+ * read the ST-written shared key bitmap directly. */
+static bool test_mode_esc_held(void) {
+    const uint8_t *keys =
+        (const uint8_t *)((const uint8_t *)&__rom_in_ram_start__ + ST_KEY_BITMAP_OFFSET);
+    const uint8_t esc_mask = (uint8_t)(1u << (TEST_MODE_ESC_SCANCODE & 7));
+    return (keys[TEST_MODE_ESC_SCANCODE >> 3] & esc_mask) != 0;
 }
 #endif
 
@@ -211,6 +224,12 @@ static void write_palette_to_shared(void) {
     }
 }
 
+/* Enable/disable ST-side GEMDOS ESC shortcut to CMD_BOOSTER. */
+static void set_st_esc_exit_enabled(bool enabled) {
+    uint8_t *flag = (uint8_t *)(memorySharedAddress + ST_ESC_EXIT_ENABLE_OFFSET);
+    flag[0] = enabled ? 1u : 0u;
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
  * emul_start — main entry point (called from main.c after clock/voltage init)
  * ────────────────────────────────────────────────────────────────────────── */
@@ -283,6 +302,12 @@ void __not_in_flash_func(emul_start)(void) {
     input_set_key_bitmap_address(
         (const void *)((uint8_t *)&__rom_in_ram_start__ + ST_KEY_BITMAP_OFFSET));
 
+#if TEST_IMAGE_MODE_ACTIVE
+    set_st_esc_exit_enabled(true);
+#else
+    set_st_esc_exit_enabled(false);
+#endif
+
     /* ────────────────────────────────────────────────────────────────────
      * Initialise pixel masks (needed by C2P, must be before Core 1 starts)
      * ──────────────────────────────────────────────────────────────────── */
@@ -315,7 +340,7 @@ void __not_in_flash_func(emul_start)(void) {
     DPRINTF("Entering TEST_IMAGE_MODE loop\n");
     while (1) {
         sem_acquire_blocking(&draw_sem);
-        if (startBooster) break;
+        if (startBooster || test_mode_esc_held()) break;
         write_palette_to_shared();
     }
 #else
