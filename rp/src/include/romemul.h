@@ -33,6 +33,7 @@ typedef void (*IRQInterceptionCallback)();
 // Function Prototypes
 int init_romemul(IRQInterceptionCallback requestCallback,
                  IRQInterceptionCallback responseCallback, bool copyFlashToRAM);
+void deinit_romemul(void);
 
 void dma_irqHandlerLookup(void);
 void dma_irqHandlerAddress(void);

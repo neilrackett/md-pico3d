@@ -243,6 +243,7 @@ static void request_booster_exit(void) {
  * ────────────────────────────────────────────────────────────────────────── */
 void __not_in_flash_func(emul_start)(void) {
 
+    startBooster = false;
     emul_preinit();
 
     /* Copy ST firmware to ROM_IN_RAM */
@@ -443,6 +444,8 @@ void __not_in_flash_func(emul_start)(void) {
     /* ST firmware reset handler keys off REMOTE_RESET (command 1). */
     SEND_COMMAND_TO_DISPLAY(DISPLAY_COMMAND_RESET);
     sleep_ms(SLEEP_LOOP_MS);
+
+    deinit_romemul();
 
     reset_jump_to_booster();
     while (1) sleep_ms(SLEEP_LOOP_MS);
