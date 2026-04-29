@@ -62,6 +62,7 @@ COOKIE_JAR_MEGASTE  equ $00010010
 
 ROMCMD_START_ADDR   equ $FB0000
 CMD_BOOSTER         equ ($ABCD)
+CMD_ANY_KEY         equ ($A11E)
 CMD_VBLANK          equ ($DCBA)
 CMD_START_DEMO      equ ($E1A8)
 
@@ -238,19 +239,25 @@ check_esc       macro
                 endm
 
 ; Optional ESC detection using GEMDOS queue (same approach as md-sprites-demo).
-; Enabled only when ESC_EXIT_ENABLE_ADDR is non-zero.
-; Trashes: d0, d7, a0
+; Sends CMD_ANY_KEY for any key; ESC specifically sends CMD_BOOSTER.
+; Trashes: d0, d6, d7, a0
 check_keys_booster macro
-                tst.b ESC_EXIT_ENABLE_ADDR
-                beq .\@no_key
                 gemdos Cconis,2              ; key available?
                 tst.l d0
                 beq .\@no_key
                 gemdos Cnecin,2              ; read key
-                cmp.b #27, d0                ; ASCII ESC
-                bne .\@no_key
+                move.l d0, d6
+                swap d6
+                andi.b #$FF, d6              ; IKBD scancode in high word
+                cmpi.b #$01, d6              ; ESC
+                bne.s .\@any_key
                 move.l #(ROMCMD_START_ADDR + $8000), a0
                 move.w #CMD_BOOSTER, d7
+                tst.b (a0, d7.w)
+                bra.s .\@no_key
+.\@any_key:
+                move.l #(ROMCMD_START_ADDR + $8000), a0
+                move.w #CMD_ANY_KEY, d7
                 tst.b (a0, d7.w)
 .\@no_key:
                 endm

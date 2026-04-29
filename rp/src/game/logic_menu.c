@@ -45,7 +45,7 @@ void display_menu(void) {
         font_move(0,   80*2); font_printf("C0U:%d", (int)logic_time);
 #endif
 
-        font_move(0, 100*2); font_print("UP/DOWN: (no brightness on ST)");
+        // font_move(0, 100*2); font_print("UP/DOWN: (no brightness on ST)");
         font_move(0, 110*2); font_print("ESC: Exit");
 
     } else if (menu == MENU_START) {
@@ -55,7 +55,7 @@ void display_menu(void) {
             font_move(0, 0); font_print("BENCHMARKING");
         }
 #else
-        if (demo_progress < 500) {
+        if (demo_progress < 250) {
             font_move(28*2, 20*2); font_print("Neil Rackett presents");
         } else if (demo_progress < 2500) {
             font_move(28*2, 20*2); font_print("Pico3D for Atari ST");

@@ -49,6 +49,7 @@
 static semaphore_t draw_sem;
 static semaphore_t start_demo_sem;
 static volatile bool startBooster = false;
+static volatile bool startMenuAnyKey = false;
 
 static uint32_t memorySharedAddress     = 0;
 static uint32_t displayCommandAddress   = 0;
@@ -167,6 +168,9 @@ void __not_in_flash_func(emul_dma_irq_handler_lookup)(void) {
                 case 0xABCD:  /* ESC → return to Booster */
                     startBooster = true;
                     sem_release(&draw_sem);
+                    break;
+                case 0xA11E:  /* Any key pressed while ST-side start menu hook is enabled */
+                    startMenuAnyKey = true;
                     break;
                 default:
                     break;
@@ -323,7 +327,7 @@ void __not_in_flash_func(emul_start)(void) {
 #if TEST_IMAGE_MODE_ACTIVE
     set_st_esc_exit_enabled(true);
 #else
-    set_st_esc_exit_enabled(false);
+    set_st_esc_exit_enabled(true);
 #endif
 
     /* ────────────────────────────────────────────────────────────────────
@@ -395,6 +399,17 @@ void __not_in_flash_func(emul_start)(void) {
 
         /* ── Core 0: logic + triangle building ── */
         global_time++;
+        if (menu == MENU_START) {
+            if (startMenuAnyKey) {
+                startMenuAnyKey = false;
+                logic_new_game();
+                menu = 0;
+            }
+            set_st_esc_exit_enabled(true);
+        } else {
+            startMenuAnyKey = false;
+            set_st_esc_exit_enabled(false);
+        }
         logic_day_night_cycle();
         logic_input();
         logic_events();
