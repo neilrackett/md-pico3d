@@ -14,6 +14,16 @@ static int32_t death_reset = 0;
 int32_t input_idle_timer = 0;
 #endif
 
+static void reset_dynamic_npcs(void) {
+    for (int i = 0; i < MAX_NPCS; i++) {
+        npc_list[i].status = -1;
+    }
+
+    for (int i = 0; i < MAX_ZOMBIES; i++) {
+        zombie_list[i].status = -1;
+    }
+}
+
 void logic_new_game() {
 
     //reset all the values to initial game values
@@ -47,6 +57,11 @@ void logic_new_game() {
     #ifdef GAMESCOM
     input_idle_timer = 0;
     #endif
+
+    reset_dynamic_npcs();
+    close_npc = -1;
+    dialogue_time_remain = 0;
+    dialogue_display = 0;
 
     //initialise quest npcs which are not randomly generated
     init_quest_npcs();
@@ -85,7 +100,7 @@ void logic_events() {
         close_npc = -1;
         if (player_area != AREA_OUTSKIRTS) {
             for (int i = 0; i < MAX_QUEST_NPCS; i++) {
-                if (npc_quest_list[MAX_QUEST_NPCS].status != -1) {
+                if (npc_quest_list[i].status != -1) {
                     //we only load npcs if they are close to the player
                     int32_t distancex = npc_quest_list[i].x - camera_position_fixed_point[0];
                     if (distancex < 0) {

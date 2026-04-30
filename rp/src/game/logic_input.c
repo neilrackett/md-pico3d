@@ -9,10 +9,15 @@
 #define KEY_DOWN    0x50
 #define KEY_LEFT    0x4B
 #define KEY_RIGHT   0x4D
-#define KEY_SPACE   0x39  /* A: shoot/interact */
-#define KEY_LSHIFT  0x2A  /* X: look up */
-#define KEY_LCTRL   0x1D  /* B: look down */
-#define KEY_ESCAPE  0x01  /* Y: menu */
+#define KEY_SPACE   0x39  /* Shoot / talk */
+#define KEY_A       0x1E  /* Look up */
+#define KEY_Z       0x2C  /* Look down */
+#define KEY_M       0x32  /* Menu toggle */
+#define KEY_ESCAPE  0x01  /* Always exit to Booster (handled by ST firmware) */
+
+/* Keep translation movement speed unchanged, but reduce yaw speed by 90%
+ * for smoother turning on keyboard input. */
+#define TURN_SENSITIVITY (INPUT_SENSITIVITY * 0.1f)
 
 /* Key state bitmap: 128 bits (16 bytes), one bit per scancode 0-127.
  * Populated by the ST assembly each frame from ACIA keyboard polling. */
@@ -85,12 +90,12 @@ void logic_input(void) {
     if (menu == 0) {
 
         if (key_held(KEY_LEFT)) {
-            yaw += INPUT_SENSITIVITY;
+            yaw += TURN_SENSITIVITY;
             update_camera();
         }
 
         if (key_held(KEY_RIGHT)) {
-            yaw -= INPUT_SENSITIVITY;
+            yaw -= TURN_SENSITIVITY;
             update_camera();
         }
 
@@ -104,12 +109,12 @@ void logic_input(void) {
             update_camera();
         }
 
-        if (key_held(KEY_LSHIFT)) {
+        if (key_held(KEY_A)) {
             pitch += 0.1f;
             update_camera();
         }
 
-        if (key_held(KEY_LCTRL)) {
+        if (key_held(KEY_Z)) {
             pitch -= 0.1f;
             update_camera();
         }
@@ -123,22 +128,22 @@ void logic_input(void) {
             }
         }
 
-        if (key_pressed(KEY_ESCAPE)) {
+        if (key_pressed(KEY_M)) {
             menu = MENU_MAIN;
         }
 
     } else if (menu == MENU_MAIN) {
 
-        if (key_pressed(KEY_ESCAPE)) {
+        if (key_pressed(KEY_M)) {
             menu = 0;
         }
 
 #ifdef FREE_ROAM
-        if (key_held(KEY_LSHIFT)) {
+        if (key_held(KEY_A)) {
             camera_position[1] += 0.1f;
             update_camera();
         }
-        if (key_held(KEY_LCTRL)) {
+        if (key_held(KEY_Z)) {
             camera_position[1] -= 0.1f;
             update_camera();
         }

@@ -59,7 +59,7 @@ void display_info(void) {
             font_move(75 * 2, 0);
             font_print("No Ammo");
         } else if (player_ammo > 99) {
-            font_move(100 * 2, 0);
+            font_move(100*2, 0);
             font_print_int((int)player_ammo);
         } else if (player_ammo > 9) {
             font_move(107 * 2, 0);
@@ -76,17 +76,17 @@ void display_info(void) {
     /* Area name */
     font_set_color(15);
     if (info_time_remain != 0) {
+        font_move(20*2, 10*2);
         if (player_area == AREA_OUTSKIRTS) {
-            font_move(38 * 2, 20 * 2); font_print("Outskirts");
+            font_print("Outskirts");
         } else if (player_area == AREA_YAKUZA_ALLEY) {
-            font_move(35 * 2, 20 * 2); font_print("Back Alley");
+            font_print("Back Alley");
         } else if (player_area == AREA_DOWNTOWN) {
-            font_move(38 * 2, 20 * 2); font_print("Downtown");
+            font_print("Downtown");
         } else if (player_area == AREA_CITY_CENTER) {
-            font_move(35 * 2, 20 * 2); font_print("City Center");
+            font_print("City Center");
         } else if (player_area == AREA_OUTSKIRT_STABLES) {
-            font_move(37 * 2, 20 * 2); font_print("Outskirt");
-            font_move(40 * 2, 30 * 2); font_print("Stable");
+            font_print("Outskirt / Stable");
         }
         info_time_remain--;
     }
@@ -95,9 +95,9 @@ void display_info(void) {
     if (close_npc != -1) {
         if (close_npc == 1 &&
             (npc_quest_list[close_npc].dialogue == 11 || npc_quest_list[close_npc].dialogue == 12)) {
-            font_move(0, 110 * 2); font_print("A: Buy Ammo");
+            font_move(0, 90*2); font_print("SPACE: Buy Ammo");
         } else {
-            font_move(0, 110 * 2); font_print("A: Talk");
+            font_move(0, 90*2); font_print("SPACE: Talk");
         }
     }
 
@@ -105,46 +105,46 @@ void display_info(void) {
     if (dialogue_time_remain != 0) {
         switch (dialogue_display) {
             case 0:  font_move(0, 90*2); font_print("Hey there! You seem");
-                     font_move(0,100*2); font_print("to be new around here."); break;
+                     font_move(0,95*5); font_print("to be new around here."); break;
             case 1:  font_move(0, 90*2); font_print("I am guarding the");
-                     font_move(0,100*2); font_print("city from zombies."); break;
+                     font_move(0,95*5); font_print("city from zombies."); break;
             case 2:  font_move(0, 90*2); font_print("Be careful if you");
-                     font_move(0,100*2); font_print("go out, they will attack."); break;
+                     font_move(0,95*5); font_print("go out, they will attack."); break;
             case 3:  font_move(0, 90*2); font_print("The gates close at");
-                     font_move(0,100*2); font_print("night. Be back by then."); break;
+                     font_move(0,95*5); font_print("night. Be back by then."); break;
             case 4:  font_move(0, 90*2); font_print("Zombies are more");
-                     font_move(0,100*2); font_print("aggressive in the dark."); break;
+                     font_move(0,95*5); font_print("aggressive in the dark."); break;
             case 5:  font_move(0, 90*2); font_print("Try not to run out");
-                     font_move(0,100*2); font_print("of ammo out there."); break;
+                     font_move(0,95*5); font_print("of ammo out there."); break;
             case 6:  if (player_kills <= 100) {
                          font_move(0, 90*2); font_print("See if you can kill");
-                         font_move(0,100*2); font_print("a couple of the zombies.");
+                         font_move(0,95*5); font_print("a couple of the zombies.");
                      } else {
                          font_move(0, 90*2); font_print("Wow you got over a 100!");
-                         font_move(0,100*2); font_print("You're a zombie killer!");
+                         font_move(0,95*5); font_print("You're a zombie killer!");
                      }
                      break;
             case 10: font_move(0, 90*2); font_print("Need Bullets?");
-                     font_move(0,100*2); font_print("10$ for 5."); break;
+                     font_move(0,95*5); font_print("10$ for 5."); break;
             case 11: font_move(0, 90*2); font_print("Good hunting.");
-                     font_move(0,100*2); font_printf("%d$ -> %d$",
+                     font_move(0,95*5); font_printf("%d$ -> %d$",
                          (int)(player_money + QUEST_AMMO_COST), (int)player_money); break;
             case 12: font_move(0, 90*2); font_print("You don't have");
-                     font_move(0,100*2); font_print("enough money."); break;
+                     font_move(0,95*5); font_print("enough money."); break;
             case 20: font_move(0, 90*2); font_print("Oh, well done for");
-                     font_move(0,100*2); font_print("making it here."); break;
+                     font_move(0,95*5); font_print("making it here."); break;
             case 21: font_move(0, 90*2); font_print("The fire keeps the");
-                     font_move(0,100*2); font_print("zombies away."); break;
+                     font_move(0,95*5); font_print("zombies away."); break;
             case 22: font_move(0, 90*2); font_print("This place used to");
-                     font_move(0,100*2); font_print("have horses but..."); break;
+                     font_move(0,95*5); font_print("have horses but..."); break;
             case 23: font_move(0, 90*2); font_print("I mean look at the");
-                     font_move(0,100*2); font_print("surroundings..."); break;
+                     font_move(0,95*5); font_print("surroundings..."); break;
             case 24: font_move(0, 90*2); font_print("The stable owner is");
-                     font_move(0,100*2); font_print("pretty unhappy."); break;
+                     font_move(0,95*5); font_print("pretty unhappy."); break;
             case 25: font_move(0, 90*2); font_print("Sells ammo to anyone");
-                     font_move(0,100*2); font_print("hoping it will help."); break;
+                     font_move(0,95*5); font_print("hoping it will help."); break;
             case 26: font_move(0, 90*2); font_print("Don't get killed and");
-                     font_move(0,100*2); font_print("get some rest here."); break;
+                     font_move(0,95*5); font_print("get some rest here."); break;
             default: break;
         }
         dialogue_time_remain--;

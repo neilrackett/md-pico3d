@@ -26,27 +26,27 @@ void display_menu(void) {
 
     if (menu == MENU_MAIN) {
 
-        font_move(0, 0);   font_print("MENU:");
-        font_move(0, 20*2); font_printf("Health: %d", (int)player_health);
-        font_move(0, 30*2); font_printf("Ammo: %d",   (int)player_ammo);
-        font_move(0, 40*2); font_printf("Kills: %d",  (int)player_kills);
-        font_move(0, 50*2); font_printf("Money: %d$", (int)player_money);
+        font_move(5*2, 5*2);  font_print("MENU:");
+        font_move(5*2, 20*2); font_printf("Health: %d", (int)player_health);
+        font_move(5*2, 25*2); font_printf("Ammo: %d",   (int)player_ammo);
+        font_move(5*2, 30*2); font_printf("Kills: %d",  (int)player_kills);
+        font_move(5*2, 35*2); font_printf("Money: %d$", (int)player_money);
 
 #ifdef FRAME_COUNTER
         font_move(60*2,  0);   font_printf("40:%d", (int)perf_25_below);
         font_move(60*2, 10*2); font_printf("20:%d", (int)perf_50_below);
-        font_move(60*2, 20*2); font_printf("13:%d", (int)perf_75_below);
-        font_move(60*2, 30*2); font_printf("<13:%d",(int)perf_75_above);
+        font_move(60*2, 15*2); font_printf("13:%d", (int)perf_75_below);
+        font_move(60*2, 20*2); font_printf("<13:%d",(int)perf_75_above);
 #endif
 
 #ifdef DEBUG_INFO
-        font_move(0,   70*2); font_printf("#R: %d", (int)rendered_triangles);
+        font_move(5*2, 70*2); font_printf("#R: %d", (int)rendered_triangles);
         font_move(60*2,70*2); font_printf("#C: %d", (int)cached_triangles);
-        font_move(0,   80*2); font_printf("C0U:%d", (int)logic_time);
+        font_move(5*2, 75*2); font_printf("C0U:%d", (int)logic_time);
 #endif
 
         // font_move(0, 100*2); font_print("UP/DOWN: (no brightness on ST)");
-        font_move(0, 110*2); font_print("ESC: Exit");
+        font_move(5*2, 90*2); font_print("M: Exit Menu");
 
     } else if (menu == MENU_START) {
 
@@ -55,14 +55,21 @@ void display_menu(void) {
             font_move(0, 0); font_print("BENCHMARKING");
         }
 #else
-        // Location name appears at the start for 120 (2.4s), so we wait +1s before showing the title
-        if (demo_progress > 170) {
-            if (demo_progress < 320) {
-                font_move(20*2, 20*2); font_print("Neil Rackett presents");
-            } else if (demo_progress < 2500) {
-                font_move(20*2, 20*2); font_print("Pico3D for Atari ST");
-            }
+        if (demo_progress < 200) {
+            font_move(20*2, 20*2); font_print("Neil Rackett presents");
+        } else {
+            font_move(20*2, 20*2); font_print("Pico3D for Atari ST");
         }
+
+        // TODO Work out a nicer way to display this
+        //  if (demo_progress > 400) {
+        //     font_move(20*2, 40*2); font_print("UP / DOWN        Move");
+        //     font_move(20*2, 45*2); font_print("LEFT / RIGHT     Rotate");
+        //     font_move(20*2, 50*2); font_print("A / Z            Look");
+        //     font_move(20*2, 55*2); font_print("SPACE            Shoot / Interact");
+        //     font_move(20*2, 60*2); font_print("M                Menu");
+        //     font_move(20*2, 65*2); font_print("ESC              Exit");
+        // }
 
         if ((demo_progress / 32) % 2 == 0) {
             font_move(20*2, 90*2); font_print("Press any key");

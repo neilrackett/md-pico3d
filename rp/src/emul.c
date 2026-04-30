@@ -240,21 +240,27 @@ static void set_st_esc_exit_enabled(bool enabled) {
     flag[0] = enabled ? 1u : 0u;
 }
 
-/* Build the shared 128-key bitmap from key event TTLs.
- * This does not rely on ST-side ROM writes and gives us stable key input
- * via GEMDOS keyboard queue events. */
+/* Optional fallback for key state synthesis from GEMDOS queue events.
+ * The ST firmware writes true make/break key state into shared memory, so
+ * normal gameplay should consume that directly. */
 static void update_key_bitmap_from_key_events(void) {
     uint8_t *keys = (uint8_t *)(uintptr_t)(memorySharedAddress + ST_KEY_BITMAP_OFFSET);
-    memset(keys, 0, 16);
+    uint8_t merged[16];
+
+    for (int i = 0; i < 16; i++) {
+        merged[i] = keys[i];
+    }
 
     for (uint8_t scan = 0; scan < 128; scan++) {
         uint8_t ttl = key_event_ttl[scan];
         if (ttl == 0) {
             continue;
         }
-        keys[scan >> 3] |= (uint8_t)(1u << (scan & 7));
+        merged[scan >> 3] |= (uint8_t)(1u << (scan & 7));
         key_event_ttl[scan] = (uint8_t)(ttl - 1);
     }
+
+    for (int i = 0; i < 16; i++) keys[i] = merged[i];
 }
 
 /* Request a clean ST handoff on short SELECT press.
@@ -424,7 +430,6 @@ void __not_in_flash_func(emul_start)(void) {
 
         /* ── Core 0: logic + triangle building ── */
         global_time++;
-        set_st_esc_exit_enabled(menu == MENU_START);
         update_key_bitmap_from_key_events();
         logic_day_night_cycle();
         logic_input();
