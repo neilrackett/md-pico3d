@@ -41,12 +41,6 @@ void logic_player_area(void) {
 }
 
 void display_info(void) {
-
-    /* HUD/info should render only during active gameplay, not intro/menu screens. */
-    if (menu != 0) {
-        return;
-    }
-
     font_set_color(15);
 
     if (player_area == AREA_OUTSKIRTS) {

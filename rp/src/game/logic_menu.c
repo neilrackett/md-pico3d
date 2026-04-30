@@ -55,10 +55,13 @@ void display_menu(void) {
             font_move(0, 0); font_print("BENCHMARKING");
         }
 #else
-        if (demo_progress < 250) {
-            font_move(28*2, 20*2); font_print("Neil Rackett presents");
-        } else if (demo_progress < 2500) {
-            font_move(28*2, 20*2); font_print("Pico3D for Atari ST");
+        // Location name appears at the start for 120 (2.4s), so we wait +1s before showing the title
+        if (demo_progress > 170) {
+            if (demo_progress < 320) {
+                font_move(20*2, 20*2); font_print("Neil Rackett presents");
+            } else if (demo_progress < 2500) {
+                font_move(20*2, 20*2); font_print("Pico3D for Atari ST");
+            }
         }
 
         if ((demo_progress / 32) % 2 == 0) {
