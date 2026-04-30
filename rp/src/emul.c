@@ -45,11 +45,15 @@
  * ────────────────────────────────────────────────────────────────────────── */
 #define CUSTOM_FRAMEBUFFER_INDEX 0x5FC
 #define CUSTOM_DISPLAY_COMMAND   0x5F8
+#define ST_CMD_KEY_EVENT_BASE    0x9000u
+#define ST_CMD_KEY_EVENT_MASK    0xFF80u
+#define ST_CMD_KEY_EVENT_BITS    0x007Fu
+#define KEY_EVENT_HOLD_FRAMES    20u
 
 static semaphore_t draw_sem;
 static semaphore_t start_demo_sem;
 static volatile bool startBooster = false;
-static volatile bool startMenuAnyKey = false;
+static volatile uint8_t key_event_ttl[128];
 
 static uint32_t memorySharedAddress     = 0;
 static uint32_t displayCommandAddress   = 0;
@@ -158,6 +162,11 @@ void __not_in_flash_func(emul_dma_irq_handler_lookup)(void) {
 
         if (!rom3_gpio) {
             uint16_t addr_lsb = (uint16_t)(addr ^ ADDRESS_HIGH_BIT);
+            if ((addr_lsb & ST_CMD_KEY_EVENT_MASK) == ST_CMD_KEY_EVENT_BASE) {
+                uint8_t scan = (uint8_t)(addr_lsb & ST_CMD_KEY_EVENT_BITS);
+                key_event_ttl[scan] = KEY_EVENT_HOLD_FRAMES;
+                return;
+            }
             switch (addr_lsb) {
                 case 0xDCBA:  /* VBLANK tick from ST */
                     sem_release(&draw_sem);
@@ -168,9 +177,6 @@ void __not_in_flash_func(emul_dma_irq_handler_lookup)(void) {
                 case 0xABCD:  /* ESC → return to Booster */
                     startBooster = true;
                     sem_release(&draw_sem);
-                    break;
-                case 0xA11E:  /* Any key pressed while ST-side start menu hook is enabled */
-                    startMenuAnyKey = true;
                     break;
                 default:
                     break;
@@ -234,6 +240,23 @@ static void set_st_esc_exit_enabled(bool enabled) {
     flag[0] = enabled ? 1u : 0u;
 }
 
+/* Build the shared 128-key bitmap from key event TTLs.
+ * This does not rely on ST-side ROM writes and gives us stable key input
+ * via GEMDOS keyboard queue events. */
+static void update_key_bitmap_from_key_events(void) {
+    uint8_t *keys = (uint8_t *)(uintptr_t)(memorySharedAddress + ST_KEY_BITMAP_OFFSET);
+    memset(keys, 0, 16);
+
+    for (uint8_t scan = 0; scan < 128; scan++) {
+        uint8_t ttl = key_event_ttl[scan];
+        if (ttl == 0) {
+            continue;
+        }
+        keys[scan >> 3] |= (uint8_t)(1u << (scan & 7));
+        key_event_ttl[scan] = (uint8_t)(ttl - 1);
+    }
+}
+
 /* Request a clean ST handoff on short SELECT press.
  * This avoids resetting RP2040 mid-frame while the ST is still displaying
  * Sidecar framebuffers. */
@@ -248,6 +271,7 @@ static void request_booster_exit(void) {
 void __not_in_flash_func(emul_start)(void) {
 
     startBooster = false;
+    memset((void *)key_event_ttl, 0, sizeof(key_event_ttl));
     emul_preinit();
 
     /* Copy ST firmware to ROM_IN_RAM */
@@ -362,6 +386,7 @@ void __not_in_flash_func(emul_start)(void) {
     DPRINTF("Entering TEST_IMAGE_MODE loop\n");
     while (1) {
         sem_acquire_blocking(&draw_sem);
+        update_key_bitmap_from_key_events();
         if (startBooster || test_mode_esc_held()) break;
         write_palette_to_shared();
     }
@@ -399,17 +424,8 @@ void __not_in_flash_func(emul_start)(void) {
 
         /* ── Core 0: logic + triangle building ── */
         global_time++;
-        if (menu == MENU_START) {
-            if (startMenuAnyKey) {
-                startMenuAnyKey = false;
-                logic_new_game();
-                menu = 0;
-            }
-            set_st_esc_exit_enabled(true);
-        } else {
-            startMenuAnyKey = false;
-            set_st_esc_exit_enabled(false);
-        }
+        set_st_esc_exit_enabled(menu == MENU_START);
+        update_key_bitmap_from_key_events();
         logic_day_night_cycle();
         logic_input();
         logic_events();
