@@ -430,7 +430,6 @@ void __not_in_flash_func(emul_start)(void) {
 
         /* ── Core 0: logic + triangle building ── */
         global_time++;
-        update_key_bitmap_from_key_events();
         logic_day_night_cycle();
         logic_input();
         logic_events();

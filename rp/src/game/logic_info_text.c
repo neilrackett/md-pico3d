@@ -13,6 +13,11 @@ int32_t info_display      = 0;
 
 int32_t dialogue_time_remain = 0;
 int32_t dialogue_display     = 0;
+static int32_t help_overlay_visible = 0;
+
+void logic_toggle_help_overlay(void) {
+    help_overlay_visible = !help_overlay_visible;
+}
 
 void logic_player_area(void) {
 
@@ -42,6 +47,11 @@ void logic_player_area(void) {
 
 void display_info(void) {
     font_set_color(15);
+
+    if (menu == 0) {
+        font_move(95*2, 90*2);
+        font_print("F1: Help");
+    }
 
     if (player_area == AREA_OUTSKIRTS) {
 
@@ -148,5 +158,14 @@ void display_info(void) {
             default: break;
         }
         dialogue_time_remain--;
+    }
+
+    if (menu == 0 && help_overlay_visible) {
+        font_move(20*2, 40*2); font_print("UP / DOWN        Move");
+        font_move(20*2, 45*2); font_print("LEFT / RIGHT     Rotate");
+        font_move(20*2, 50*2); font_print("A / Z            Look");
+        font_move(20*2, 55*2); font_print("SPACE            Shoot / Interact");
+        font_move(20*2, 60*2); font_print("M                Menu");
+        font_move(20*2, 65*2); font_print("ESC              Exit");
     }
 }

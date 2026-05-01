@@ -61,16 +61,6 @@ void display_menu(void) {
             font_move(20*2, 20*2); font_print("Pico3D for Atari ST");
         }
 
-        // TODO Work out a nicer way to display this
-        //  if (demo_progress > 400) {
-        //     font_move(20*2, 40*2); font_print("UP / DOWN        Move");
-        //     font_move(20*2, 45*2); font_print("LEFT / RIGHT     Rotate");
-        //     font_move(20*2, 50*2); font_print("A / Z            Look");
-        //     font_move(20*2, 55*2); font_print("SPACE            Shoot / Interact");
-        //     font_move(20*2, 60*2); font_print("M                Menu");
-        //     font_move(20*2, 65*2); font_print("ESC              Exit");
-        // }
-
         if ((demo_progress / 32) % 2 == 0) {
             font_move(20*2, 90*2); font_print("Press any key");
         }

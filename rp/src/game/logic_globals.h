@@ -130,6 +130,7 @@ void logic_input(void);
 void logic_new_game(void);
 void logic_npc(void);
 void logic_player_area(void);
+void logic_toggle_help_overlay(void);
 void logic_shoot(void);
 void logic_zombies(void);
 
