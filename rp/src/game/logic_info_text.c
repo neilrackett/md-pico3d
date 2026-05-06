@@ -56,10 +56,11 @@ void display_info(void) {
     if (player_area == AREA_OUTSKIRTS) {
 
         /* Health */
-        if (player_health < 30)
+        if (player_health < 30) {
             font_set_color(15);  /* would be red, but we only have index 15 as white */
-        else
+        } else {
             font_set_color(15);
+        }
         font_move(0, 0);
         font_printf("+%d", (int)player_health);
 

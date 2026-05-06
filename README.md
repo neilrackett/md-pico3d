@@ -50,43 +50,19 @@ The pico-sdk and pico-extras submodules are checked out automatically by the bui
 
 ### Test Image Mode
 
-`TEST_IMAGE_MODE` is a compile-time mode that skips gameplay and displays one static test image through the same ST output path (chunky RGB4444 → Bayer-dithered C2P → 320×200 planar + palette upload).
-
-Normal builds remain unchanged by default.
-
-Enable test mode from CLI:
+`TEST_IMAGE_MODE` is a compile-time mode used to test the render pipeline by skipping gameplay and displays a static test image through the same ST output path (chunky RGB4444 → Bayer-dithered C2P → 320×200 planar + palette upload).
 
 ```sh
 TEST_IMAGE_MODE=1 ./build.sh pico debug <uuid>
 ```
 
-Enable test mode in VS Code CMake Tools:
-
-```json
-"cmake.configureSettings": {
-  "TEST_IMAGE_MODE": "1"
-}
-```
-
-If you toggle this value, run a CMake reconfigure (or clear cache + reconfigure) before rebuilding.
-
-Test image input requirements:
-
-- Path: `assets/test_mode.png`
-- Size: `160x100` exactly
-- PNG types accepted: RGB, RGBA, or palettized (converted internally to RGB)
-
-Regenerate the image header after changing `assets/test_mode.png`:
+If you would like to update the image, run:
 
 ```sh
 python3 tools/gen_test_mode_image.py \
   --input assets/test_mode.png \
   --output rp/src/include/test_mode_image.h
 ```
-
-The converter fails with a clear error if the image is missing, has the wrong size, or Pillow is not installed.
-
-In test mode the firmware uses a fixed 16-colour EGA palette and keeps the normal ST handshake / framebuffer / palette pipeline active.
 
 ### Palette data
 
