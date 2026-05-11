@@ -6,17 +6,22 @@ Ported from [Pimoroni PicoSystem](https://github.com/bernhardstrobl/Pico3D) to A
 
 ## Overview
 
+_It loads, it runs, you can walk around, you can look up (and sometimes down again), but it's still very much a work in progress_
+
 This engine uses the second core of the RP2040 microcontroller inside the SidecarTridge Multi-device as a rasterizer to render 3D graphics at 160×100 (pixel-doubled to 320×200) in 16 colours on the Atari ST.
 
 It contains a small city as well as city outskirts featuring a small shooter with zombies.
-
-[Gameplay video](https://www.youtube.com/watch?v=n6bECGQyNuk)  
-[Demo video](https://www.youtube.com/watch?v=6WkltAOFDYs)
 
 ## Hardware Requirements
 
 - [SidecarTridge Multi-device](https://store.sidecartridge.com) (RP2040-based ROM cartridge emulator)
 - Atari ST, STE, MegaST, or MegaSTE in low-resolution mode (320×200, 16 colours)
+
+## Installation
+
+1. Download the latest files from the [releases page](https://github.com/neilrackett/md-pico3d/releases).
+2. Copy the `.uf2` and `.json` files to the `/apps` folder of your SidecarT's microSD card.
+3. On the Booster screen, press ESC for the app list and select the Xpad app.
 
 ## Building from Source
 
