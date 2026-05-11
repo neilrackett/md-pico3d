@@ -21,7 +21,7 @@ It contains a small city as well as city outskirts featuring a small shooter wit
 
 1. Download the latest files from the [releases page](https://github.com/neilrackett/md-pico3d/releases).
 2. Copy the `.uf2` and `.json` files to the `/apps` folder of your SidecarT's microSD card.
-3. On the Booster screen, press ESC for the app list and select the Xpad app.
+3. On the Booster screen, press ESC for the app list and select the Pico3D app.
 
 ## Building from Source
 
