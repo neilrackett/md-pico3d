@@ -6,9 +6,11 @@ Ported from [Pimoroni PicoSystem](https://github.com/bernhardstrobl/Pico3D) to A
 
 ## Overview
 
-It loads, it runs, you can walk around, you can look up (and sometimes down again). If it breaks, just press SELECT-RESET and you're safely back to Booster.
+It loads, it runs, you can walk around, you can look up (and sometimes down again), and even watch the colours change as you move between day and night.
 
 It's still very much a work in progress, but you're more than welcome to give it a try!
+
+If it breaks, just press SELECT-RESET and you're safely back to Booster.
 
 This engine uses the second core of the RP2040 microcontroller inside the SidecarTridge Multi-device as a rasterizer to render 3D graphics at 160×100 (pixel-doubled to 320×200) in 16 colours on the Atari ST.
 
