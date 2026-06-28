@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define NPCLEFT 72
 struct triangle_16 npcleft[NPCLEFT] = {
 {{ 20, 367, 318},{ 225, 367, 318},{ 225, 469, 495}, 2, 0, 0x000f, 0xf000, 0x0f00}

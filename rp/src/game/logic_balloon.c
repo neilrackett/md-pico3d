@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 //Controls zombie behavior. Similar to logic_npc but more complicated since it reacts to player behavior.
 
 #include "../logic_globals.h"

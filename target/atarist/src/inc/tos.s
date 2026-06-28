@@ -1,3 +1,6 @@
+; Copyright (C) 2026 Neil Rackett
+; SPDX-License-Identifier: GPL-3.0-or-later
+
 ; SidecarTridge Multi-device - An extension to Atari ST computers through the cartridge port
 ; Copyright (C) 2023-24 GOODDATA LABS SL
 ;

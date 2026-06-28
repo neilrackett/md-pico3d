@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Chunk loading: fills the chunk cache from flash geometry data */
 #include "render_globals.h"
 #include "render_math.h"

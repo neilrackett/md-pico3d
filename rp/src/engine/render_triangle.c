@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* function to transform incoming triangle, perform clipping & lighting and put
  * it in the triangle list if visible. The triangle will then be rasterized by
  * render_rasterize() on Core1 on the next frame. */

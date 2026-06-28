@@ -1,3 +1,6 @@
+; Copyright (C) 2026 Neil Rackett
+; SPDX-License-Identifier: GPL-3.0-or-later
+
 ; Pico3D ST driver for SidecarTridge Multi-device
 ; Based on md-sprites-demo/target/atarist/src/main.s
 ; Adds: ACIA keyboard polling, palette loading from shared memory
@@ -371,20 +374,20 @@ start_rom_code:
     move.w sr, _dskbufp.w
     ori.w #$0700, sr            ; disable interrupts
 
+    ; Select display page first (at VBL boundary), then copy into the hidden page.
+    ; This avoids mid-frame page flips if the copy runs longer than blanking.
     tst.l $FA05FC               ; check framebuffer index
     beq.s .fb_b_st
 .fb_a_st:
+    move.b #(SCREEN_B_BASE_ADDR >> 16), VIDEO_BASE_ADDR_HIGH.w
+    move.b #((SCREEN_B_BASE_ADDR >> 8) & $FF), VIDEO_BASE_ADDR_MID.w
     jsr COPYCODE_A_ADDR
-    move.b #(SCREEN_B_BASE_ADDR >> 16), d0
-    move.b #((SCREEN_B_BASE_ADDR >> 8) & $FF), d1
     bra.s .continue_st
 .fb_b_st:
+    move.b #(SCREEN_A_BASE_ADDR >> 16), VIDEO_BASE_ADDR_HIGH.w
+    move.b #((SCREEN_A_BASE_ADDR >> 8) & $FF), VIDEO_BASE_ADDR_MID.w
     jsr COPYCODE_B_ADDR
-    move.b #(SCREEN_A_BASE_ADDR >> 16), d0
-    move.b #((SCREEN_A_BASE_ADDR >> 8) & $FF), d1
 .continue_st:
-    move.b d0, VIDEO_BASE_ADDR_HIGH.w
-    move.b d1, VIDEO_BASE_ADDR_MID.w
 
     move.w _dskbufp.w, sr       ; restore interrupts
 
@@ -447,6 +450,13 @@ start_rom_code:
     move.b #BLT_HOG_MODE, BLT_CTRL.w
 
     move.w _dskbufp.w, sr
+
+    ; Ensure blit has fully completed before running the rest of the frame.
+    ; Under heavy RP2040 load, source fetch latency can increase and overlap
+    ; into the next frame otherwise, which appears as gameplay flicker.
+.wait_blit_ste:
+    btst #7, BLT_CTRL.w
+    bne.s .wait_blit_ste
 
     ; Poll keyboard
     poll_kb_impl

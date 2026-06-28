@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright (C) 2026 Neil Rackett
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 gen_palette.py — Generate 4 day/night palettes and LUTs for Pico3D ST port.
 

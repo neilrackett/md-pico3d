@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 //This file handles events that the player will encounter and changes game state if needed
 #include "logic_globals.h"
 #include "../engine/render_globals.h"

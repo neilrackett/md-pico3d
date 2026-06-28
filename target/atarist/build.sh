@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright (C) 2026 Neil Rackett
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 
 # Ensure an argument is provided
 if [ -z "$1" ]; then

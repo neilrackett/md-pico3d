@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define ZOMBIE_DEAD 72
 struct triangle_16 zombie_dead[ZOMBIE_DEAD] = {
 {{ 20, 606, -979},{ 225, 606, -979},{ 225, 401, -979}, 2, 0, 0x0007, 0x0007, 0x2107}

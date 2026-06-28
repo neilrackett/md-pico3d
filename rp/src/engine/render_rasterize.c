@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Triangle rasterizer: iterates the triangle list and fills the framebuffer */
 #include "render_globals.h"
 #include "render_math.h"

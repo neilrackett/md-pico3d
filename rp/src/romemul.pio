@@ -1,3 +1,6 @@
+; Copyright (C) 2026 Neil Rackett
+; SPDX-License-Identifier: GPL-3.0-or-later
+
 ; RP2040 PIO programs to simulate a ROM cartridge for the Atari ST
 ; Author: Diego Parrilla Santamaría
 ; Date: July 2023-February 2025

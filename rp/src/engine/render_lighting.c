@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Per-vertex dynamic lighting: collects light data from chunks in a 3x3 grid */
 #include "render_globals.h"
 #include "render_math.h"

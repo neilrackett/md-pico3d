@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #include "engine/chunk_globals.h"
 
 #define WORLD_SIZE_X 12

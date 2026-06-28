@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define NPC 72
 static struct triangle_16 npc[NPC] = {
 {{ 20, 363, -102},{ 225, 363, -102},{ 225, 363, 102}, 1, 0, 0x860b, 0x860b, 0x860b}

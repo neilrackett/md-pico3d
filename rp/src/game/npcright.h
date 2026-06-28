@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define NPCRIGHT 72
 struct triangle_16 npcright[NPCRIGHT] = {
 {{ 20, 469, -492},{ 225, 469, -492},{ 225, 367, -315}, 2, 0, 0x000f, 0xf000, 0x0f00}

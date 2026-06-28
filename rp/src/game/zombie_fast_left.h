@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define ZOMBIE_FAST_LEFT 72
 struct triangle_16 zombie_fast_left[ZOMBIE_FAST_LEFT] = {
 {{ 20, 469, -483},{ 225, 469, -483},{ 225, 367, -306}, 1, 0, 0x860b, 0x860b, 0x860b}

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 //handles npc logic for npcs that are important for the game storyline like quest givers and shop keepers
 #include "logic_globals.h"
 #include "../engine/render_globals.h"

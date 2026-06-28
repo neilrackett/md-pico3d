@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /**
  * emul.c — Pico3D main loop integrated with SidecarTridge ROM emulation
  *

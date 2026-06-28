@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* View-frustum culling: quickly determine if an object needs to be drawn */
 #include "render_globals.h"
 #include "render_math.h"

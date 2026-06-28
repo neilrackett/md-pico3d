@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Chunk cache globals and world geometry definitions */
 
 #ifndef CHUNK_GLOBALS_H

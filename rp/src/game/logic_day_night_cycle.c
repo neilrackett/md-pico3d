@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Day/night cycle: updates sky colour and lighting falloff based on time */
 #include "logic_globals.h"
 #include "../engine/render_globals.h"

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 //Controls NPC behavior in the city. Pretty similar to logic_zombies so some code duplication
 //helps to keep things separate though
 #include "logic_globals.h"

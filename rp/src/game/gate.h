@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define GATE_MODEL 44
 struct triangle_16 gate_model[GATE_MODEL] = {
 {{ -51, 1024, 1536},{ -51, 9216, 1536},{ -51, 9216, -1536}, 1, 0, 0x7707, 0x7707, 0x7707}

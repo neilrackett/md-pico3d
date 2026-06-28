@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define TESTMODEL 12
 struct triangle_16 testmodel[TESTMODEL] = {
 {{ -1024, 4096, 3072},{ -3072, 4096, 3072},{ -3072, 4096, 5120}, 2, 0, 0x000f, 0xf000, 0x0f00}

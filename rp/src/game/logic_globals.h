@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #ifndef LOGIC_GLOBALS_H
 #define LOGIC_GLOBALS_H
 

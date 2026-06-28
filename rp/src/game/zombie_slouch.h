@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define ZOMBIE_SLOUCH 72
 struct triangle_16 zombie_slouch[ZOMBIE_SLOUCH] = {
 {{ 20, 363, -102},{ 225, 363, -102},{ 225, 363, 102}, 2, 0, 0x0007, 0x0007, 0x2107}

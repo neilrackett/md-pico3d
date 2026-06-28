@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright (C) 2026 Neil Rackett
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 Generate test_mode_image.h from a 160x100 PNG for TEST_IMAGE_MODE.
 

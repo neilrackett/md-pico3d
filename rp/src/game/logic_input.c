@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Handle ST keyboard input via shared memory bitmap */
 #include "logic_globals.h"
 #include "../engine/render_globals.h"

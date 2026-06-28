@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #define TESTMODEL 968
 const struct triangle_16 testmodel[TESTMODEL] = {
 {{ -2489, 3250, 4576},{ -2497, 3170, 4544},{ -2417, 3098, 4608}, 2, 0, 0x000f, 0xf000, 0x0f00}

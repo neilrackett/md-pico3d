@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /* Wireframe and line drawing utilities */
 
 static void render_pixel(color_t *fb, uint32_t x, uint32_t y) {

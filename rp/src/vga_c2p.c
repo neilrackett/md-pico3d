@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 /**
  * vga_c2p.c — Chunky-to-planar conversion with 4x4 Bayer dithering
  *

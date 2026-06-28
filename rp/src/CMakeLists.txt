@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Neil Rackett
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 cmake_minimum_required(VERSION 3.26)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
